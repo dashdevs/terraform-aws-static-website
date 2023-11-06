@@ -4,8 +4,9 @@
  **/
 
 locals {
-  s3_origin_id   = "websiteorigin"
-  s3_root_object = "index.html"
+  s3_origin_id         = "websiteorigin"
+  s3_root_object       = "index.html"
+  cors_allowed_origins = var.cors_allowed_origins != [] ? var.cors_allowed_origins : ["https://${var.domain}"]
 }
 
 data "aws_route53_zone" "public_zone" {
@@ -94,7 +95,7 @@ resource "aws_s3_bucket_cors_configuration" "website" {
   cors_rule {
     allowed_headers = ["*"]
     allowed_methods = ["GET", "HEAD"]
-    allowed_origins = ["https://${var.domain}"]
+    allowed_origins = local.cors_allowed_origins
     max_age_seconds = 3600
   }
 }
