@@ -9,6 +9,13 @@ locals {
   cors_allowed_origins = var.cors_allowed_origins != [] ? var.cors_allowed_origins : ["https://${var.domain}"]
 }
 
+check "application_repository_validation" {
+  assert {
+    condition     = !(var.create_dns_records && var.domain_zone_name == null)
+    error_message = "If create_dns_records is true then domain_zone_name must be set!"
+  }
+}
+
 data "aws_route53_zone" "public_zone" {
   count        = var.create_dns_records ? 1 : 0
   name         = var.domain_zone_name

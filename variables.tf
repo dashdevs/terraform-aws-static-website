@@ -3,7 +3,8 @@ variable "domain" {
 }
 
 variable "domain_zone_name" {
-  type = string
+  type    = string
+  default = null
 }
 
 variable "create_dns_records" {
