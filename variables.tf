@@ -9,7 +9,7 @@ variable "domain_zone_name" {
 
 variable "create_dns_records" {
   type    = bool
-  default = false
+  default = true
 }
 
 variable "cors_allowed_origins" {
