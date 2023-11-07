@@ -4,9 +4,9 @@
  **/
 
 locals {
-  s3_origin_id         = "websiteorigin"
-  s3_root_object       = "index.html"
-  cors_allowed_origins = var.cors_allowed_origins != [] ? var.cors_allowed_origins : ["https://${var.domain}"]
+  s3_origin_id              = "websiteorigin"
+  s3_root_object            = "index.html"
+  сreate_cors_configuration = var.cors_allowed_origins != [] ? true : false
 }
 
 check "application_repository_validation" {
@@ -97,12 +97,13 @@ resource "aws_s3_bucket" "website" {
 }
 
 resource "aws_s3_bucket_cors_configuration" "website" {
+  count  = local.сreate_cors_configuration ? 1 : 0
   bucket = aws_s3_bucket.website.id
 
   cors_rule {
     allowed_headers = ["*"]
     allowed_methods = ["GET", "HEAD"]
-    allowed_origins = local.cors_allowed_origins
+    allowed_origins = var.cors_allowed_origins
     max_age_seconds = 3600
   }
 }
