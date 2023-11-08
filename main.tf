@@ -6,7 +6,7 @@
 locals {
   s3_origin_id              = "websiteorigin"
   s3_root_object            = "index.html"
-  сreate_cors_configuration = var.cors_allowed_origins != [] ? true : false
+  сreate_cors_configuration = var.cors_allowed_origins != null ? true : false
 }
 
 check "application_repository_validation" {

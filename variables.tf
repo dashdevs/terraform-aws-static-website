@@ -14,5 +14,5 @@ variable "create_dns_records" {
 
 variable "cors_allowed_origins" {
   type    = list(string)
-  default = []
+  default = null
 }
