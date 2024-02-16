@@ -257,7 +257,7 @@ data "aws_iam_policy_document" "allow_website_cloudfront" {
   }
 
   dynamic "statement" {
-    for_each = var.s3_additional_policy_statements
+    for_each = var.s3_policy_statements_additional
 
     content {
       sid = statement.value["sid"]
