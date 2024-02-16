@@ -52,6 +52,7 @@ module "website" {
 ## s3_policy_statements_additional
 
 | Name | Description | Type | Default | Required |
+|------|-------------|------|---------|:--------:|
 | <a name="statement_sid"></a> [sid](#statement\_sid) | Sid (statement ID) is an identifier for a policy statement. | `string` | `n/a` | yes |
 | <a name="statement_principals"></a> [principals](#statement\_principals) | List of configuration objects for principals. Detailed below. | `list(object())` | `n/a` | yes |
 | <a name="statement_effect"></a> [effect](#statement\_effect) | Whether this statement allows or denies the given actions. Valid values are Allow and Deny. | `string` | `n/a` | yes |
@@ -63,6 +64,7 @@ module "website" {
 ## Principals
 
 | Name | Description | Type | Default | Required |
+|------|-------------|------|---------|:--------:|
 | <a name="principal_type"></a> [type](#principal\_type) | Type of principal. Valid values include `AWS`, `Service`, `Federated`, `CanonicalUser` and `*`. | `string` | `n/a` | yes |
 | <a name="principal_identifiers"></a> [identifiers](#principal\_identifiers) | List of identifiers for principals. | `list(string)` | `n/a` | yes |
 
@@ -70,6 +72,7 @@ module "website" {
 ## Conditions
 
 | Name | Description | Type | Default | Required |
+|------|-------------|------|---------|:--------:|
 | <a name="condition_test"></a> [test](#condition\_test) | Name of the IAM condition operator to evaluate. | `string` | `n/a` | yes |
 | <a name="condition_variable"></a> [variable](#condition\_variable) | Name of a Context Variable to apply the condition to. Context variables may either be standard AWS variables starting with `aws:` or service-specific variables prefixed with the service name. | `string` | `n/a` | yes |
 | <a name="condition_values"></a> [sid](#condition\_values) | List of values to evaluate the condition against. | `list(string)` | `n/a` | yes |
