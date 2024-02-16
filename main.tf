@@ -7,6 +7,8 @@ locals {
   s3_origin_id              = "websiteorigin"
   s3_root_object            = "index.html"
   сreate_cors_configuration = var.cors_allowed_origins != null ? true : false
+  bucket_name               = var.bucket_name != null ? var.bucket_name : var.domain
+  cors_allowed_methods      = var.cors_allowed_additional_methods != null ? concat(["GET", "HEAD"], var.cors_allowed_additional_methods) : ["GET", "HEAD"]
 }
 
 check "application_repository_validation" {
@@ -45,7 +47,7 @@ resource "aws_route53_record" "website_certificate_validation_records" {
   provider = aws.virginia
 
   for_each = {
-    for dvo in var.create_dns_records ? aws_acm_certificate.cerificate.domain_validation_options : [] : dvo.domain_name => {
+    for dvo in var.create_dns_records ? aws_acm_certificate.website.domain_validation_options : [] : dvo.domain_name => {
       name   = dvo.resource_record_name
       record = dvo.resource_record_value
       type   = dvo.resource_record_type
@@ -93,7 +95,7 @@ resource "aws_route53_record" "a" {
  **/
 
 resource "aws_s3_bucket" "website" {
-  bucket = var.domain
+  bucket = local.bucket_name
 }
 
 resource "aws_s3_bucket_cors_configuration" "website" {
@@ -102,7 +104,7 @@ resource "aws_s3_bucket_cors_configuration" "website" {
 
   cors_rule {
     allowed_headers = ["*"]
-    allowed_methods = ["GET", "HEAD"]
+    allowed_methods = local.cors_allowed_methods
     allowed_origins = var.cors_allowed_origins
     max_age_seconds = 3600
   }
@@ -252,6 +254,35 @@ data "aws_iam_policy_document" "allow_website_cloudfront" {
 
     actions   = ["s3:GetObject"]
     resources = ["${aws_s3_bucket.website.arn}/*"]
+  }
+
+  dynamic "statement" {
+    for_each = var.s3_additioonal_policy_statements
+
+    content {
+      sid = statement.value["sid"]
+      dynamic "principals" {
+        for_each = statement.value["principals"]
+
+        content {
+          type        = principals.value["type"]
+          identifiers = principals.value["identifiers"]
+        }
+      }
+      effect    = statement.value["effect"]
+      actions   = statement.value["actions"]
+      resources = statement.value["resources"]
+      dynamic "condition" {
+        for_each = statement.value["conditions"]
+
+        content {
+          test     = condition.value["test"]
+          variable = condition.value["variable"]
+          values   = condition.value["values"]
+        }
+
+      }
+    }
   }
 }
 
