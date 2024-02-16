@@ -14,6 +14,7 @@ systematic way so that they do not catch you by surprise.
 ```
 module "website" {
   source             = "dashdevs/static-website/aws"
+  bucket_name        = var.bucket_name
   domain             = var.domain
   domain_zone_name   = var.domain_zone_name
   create_dns_records = true
