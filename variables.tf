@@ -3,8 +3,7 @@ variable "domain" {
 }
 
 variable "bucket_name" {
-  type    = string
-  default = null
+  type = string
 }
 
 variable "domain_zone_name" {
