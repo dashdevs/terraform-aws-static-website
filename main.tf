@@ -7,7 +7,6 @@ locals {
   s3_origin_id              = "websiteorigin"
   s3_root_object            = "index.html"
   сreate_cors_configuration = var.cors_allowed_origins != null ? true : false
-  bucket_name               = var.bucket_name != null ? var.bucket_name : var.domain
   cors_allowed_methods      = var.cors_allowed_additional_methods != null ? concat(["GET", "HEAD"], var.cors_allowed_additional_methods) : ["GET", "HEAD"]
 }
 
@@ -95,7 +94,7 @@ resource "aws_route53_record" "a" {
  **/
 
 resource "aws_s3_bucket" "website" {
-  bucket = local.bucket_name
+  bucket = var.bucket_name
 }
 
 resource "aws_s3_bucket_cors_configuration" "website" {
