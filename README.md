@@ -48,9 +48,9 @@ module "website" {
 | <a name="input_domain_zone_name"></a> [domain\_zone\_name](#input\_domain\_zone\_name) | The name of the domain zone in the route53 service for which DNS records will be created. Must be set if create_dns_records is `true` | `string` | `null` | no |
 | <a name="input_create_dns_records"></a> [create\_dns\_records](#input\_create\_dns\_records) | If true, then DNS records are created in route53 for this site and connected to the cloudfront distribution | `bool` |`true`| no |
 | <a name="input_cors_allowed_origins"></a> [cors\_allowed\_origins](#input\_cors\_allowed\_origins) | Used to declare domains from which the site will be accessed as a storage of static resources | `null` |`list(string)`| no |
-| <a name="input_s3_policy_statements_additional"></a> [s3\_policy\_statements\_additional](#input\_s3\_policy\_statements\_additional) | Additional policies that need to be attached to the S3 bucket. | `null` | `list(object)`| no |
+| <a name="input_s3_policy_statements_additional"></a> [s3\_policy\_statements\_additional](#input\_s3\_policy\_statements\_additional) | Additional policies that need to be attached to the S3 bucket. <a name="statement_header"></a>[Detailed](#statement\_header)| `null` | `list(object)`| no |
 
-## s3_policy_statements_additional
+<a name="statement_header"></a>[## s3\_policy\_statements\_additional](#statement\_header)
 
 | Name | Description | Type | Default | Required |
 |------|-------------|------|---------|:--------:|
