@@ -21,7 +21,7 @@ variable "cors_allowed_origins" {
   default = null
 }
 
-variable "cors_allowed_additional_methods" {
+variable "cors_allowed_methods_additional" {
   type    = list(string)
   default = null
 }
