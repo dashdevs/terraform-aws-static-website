@@ -26,7 +26,7 @@ variable "cors_allowed_additional_methods" {
   default = null
 }
 
-variable "s3_additioonal_policy_statements" {
+variable "s3_additional_policy_statements" {
   type = list(object({
     sid = string
     principals = list(object({
