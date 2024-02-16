@@ -55,11 +55,11 @@ module "website" {
 | Name | Description | Type | Default | Required |
 |------|-------------|------|---------|:--------:|
 | <a name="statement_sid"></a> [sid](#statement\_sid) | Sid (statement ID) is an identifier for a policy statement. | `string` | `n/a` | yes |
-| <a name="statement_principals"></a> [principals](#statement\_principals) | List of configuration objects for principals. | `list(object())` | `n/a` | yes |
+| <a name="statement_principals"></a> [principals](#statement\_principals) | List of configuration objects for principals. [Detailed](#Principals)| `list(object())` | `n/a` | yes |
 | <a name="statement_effect"></a> [effect](#statement\_effect) | Whether this statement allows or denies the given actions. Valid values are Allow and Deny. | `string` | `n/a` | yes |
 | <a name="statement_actions"></a> [actions](#statement\_actions) | List of actions that this statement either allows or denies. | `list(string)` | `n/a` | yes |
 | <a name="statement_resources"></a> [resources](#statement\_resources) | List of resources ARNs that this statement applies to. | `list(string)` | `n/a` | yes |
-| <a name="statement_conditions"></a> [conditions](#statement\_conditions) | List of configuration objects for a condition. | `list(object())` | `n/a` | yes |
+| <a name="statement_conditions"></a> [conditions](#statement\_conditions) | List of configuration objects for a condition. [Detailed](#Conditions)| `list(object())` | `n/a` | yes |
 
 
 ## Principals
