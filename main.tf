@@ -63,6 +63,7 @@ resource "aws_route53_record" "website_certificate_validation_records" {
 }
 
 resource "aws_acm_certificate_validation" "website_certificate_validation" {
+  count    = var.create_dns_records ? 1 : 0
   provider = aws.virginia
 
   certificate_arn         = aws_acm_certificate.website.arn
