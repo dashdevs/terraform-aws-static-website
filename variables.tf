@@ -45,3 +45,8 @@ variable "s3_policy_statements_additional" {
   default  = []
   nullable = false
 }
+
+variable "cloudfront_allowed_bucket_resources" {
+  type    = list(string)
+  default = null
+}
