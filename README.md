@@ -49,6 +49,7 @@ module "website" {
 | <a name="input_create_dns_records"></a> [create\_dns\_records](#input\_create\_dns\_records) | If true, then DNS records are created in route53 for this site and connected to the cloudfront distribution | `bool` |`true`| no |
 | <a name="input_cors_allowed_origins"></a> [cors\_allowed\_origins](#input\_cors\_allowed\_origins) | Used to declare domains from which the site will be accessed as a storage of static resources | `list(string)` |`null`| no |
 | <a name="input_s3_policy_statements_additional"></a> [s3\_policy\_statements\_additional](#input\_s3\_policy\_statements\_additional) | Additional policy [statments](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/data-sources/iam_policy_document#statement)  that need to be attached to the S3 bucket. | <pre>list(object({<br>  sid        = string<br>  principals = list(objec({<br>    type        = string<br>    identifiers = list(string)<br>  }))<br>  effect     = string<br>  actions    = list(string)<br>  resources  = list(string)<br>  conditions = list(object({<br>    test     = string<br>    variable = string<br>    values   = list(string)<br>  }))<br>}))</pre> | `null` | no |
+| <a name="input_cloudfront_allowed_bucket_resources"></a> [cloudfront\_allowed\_bucket\_resources](#input\_cloudfront\_allowed\_bucket\_resources) | List of folders that this Cloudfront is allowed to access. If not set, access is allowed to all resources of the bucket  | `list(string)` |`null`| no |
 
 
 ## Outputs
