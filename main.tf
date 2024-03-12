@@ -4,11 +4,12 @@
  **/
 
 locals {
-  s3_origin_id              = "websiteorigin"
-  s3_root_object            = "index.html"
-  cors_allowed_default      = ["GET", "HEAD"]
-  сreate_cors_configuration = var.cors_allowed_origins != null ? true : false
-  cors_allowed_methods      = var.cors_allowed_methods_additional != null ? concat(local.cors_allowed_default, var.cors_allowed_methods_additional) : local.cors_allowed_default
+  s3_origin_id                        = "websiteorigin"
+  s3_root_object                      = "index.html"
+  cors_allowed_default                = ["GET", "HEAD"]
+  сreate_cors_configuration           = var.cors_allowed_origins != null ? true : false
+  cors_allowed_methods                = var.cors_allowed_methods_additional != null ? concat(local.cors_allowed_default, var.cors_allowed_methods_additional) : local.cors_allowed_default
+  cloudfront_allowed_bucket_resources = [for resource in var.cloudfront_allowed_bucket_resources : "${aws_s3_bucket.website.arn}/${resource}"]
 }
 
 check "application_repository_validation" {
@@ -254,7 +255,7 @@ data "aws_iam_policy_document" "allow_website_cloudfront" {
     }
 
     actions   = ["s3:GetObject"]
-    resources = ["${aws_s3_bucket.website.arn}/*"]
+    resources = local.cloudfront_allowed_bucket_resources
   }
 
   dynamic "statement" {
