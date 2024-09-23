@@ -171,12 +171,9 @@ resource "aws_cloudfront_distribution" "website" {
       }
     }
 
-    viewer_protocol_policy = "redirect-to-https"
-    min_ttl                = 60
-    default_ttl            = 3600
-    max_ttl                = 86400
-
+    cache_policy_id            = aws_cloudfront_cache_policy.default.id
     response_headers_policy_id = aws_cloudfront_response_headers_policy.website_security.id
+    viewer_protocol_policy     = "redirect-to-https"
   }
 
   restrictions {
@@ -190,6 +187,23 @@ resource "aws_cloudfront_distribution" "website" {
     cloudfront_default_certificate = false
     minimum_protocol_version       = "TLSv1.2_2021"
     ssl_support_method             = "sni-only"
+  }
+}
+
+resource "aws_cloudfront_cache_policy" "default" {
+  name = replace(var.domain, ".", "-")
+
+  min_ttl     = 60
+  default_ttl = 3600
+  max_ttl     = 86400
+
+  parameters_in_cache_key_and_forwarded_to_origin {
+    enable_accept_encoding_brotli = true
+    enable_accept_encoding_gzip   = true
+
+    cookies_config { cookie_behavior = "none" }
+    headers_config { header_behavior = "none" }
+    query_strings_config { query_string_behavior = "none" }
   }
 }
 
