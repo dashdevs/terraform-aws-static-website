@@ -164,13 +164,6 @@ resource "aws_cloudfront_distribution" "website" {
     cached_methods   = ["GET", "HEAD", "OPTIONS"]
     target_origin_id = local.s3_origin_id
 
-    forwarded_values {
-      query_string = false
-      cookies {
-        forward = "none"
-      }
-    }
-
     cache_policy_id            = aws_cloudfront_cache_policy.default.id
     response_headers_policy_id = aws_cloudfront_response_headers_policy.website_security.id
     viewer_protocol_policy     = "redirect-to-https"
