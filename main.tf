@@ -125,8 +125,11 @@ resource "aws_s3_bucket_website_configuration" "website" {
  *
  **/
 
-resource "aws_cloudfront_origin_access_identity" "website" {
-  comment = var.domain
+resource "aws_cloudfront_origin_access_control" "website" {
+  name                              = var.domain
+  origin_access_control_origin_type = "s3"
+  signing_behavior                  = "always"
+  signing_protocol                  = "sigv4"
 }
 
 resource "aws_cloudfront_distribution" "website" {
@@ -137,12 +140,9 @@ resource "aws_cloudfront_distribution" "website" {
   price_class         = "PriceClass_All"
 
   origin {
-    domain_name = aws_s3_bucket.website.bucket_domain_name
-    origin_id   = local.s3_origin_id
-
-    s3_origin_config {
-      origin_access_identity = aws_cloudfront_origin_access_identity.website.cloudfront_access_identity_path
-    }
+    domain_name              = aws_s3_bucket.website.bucket_domain_name
+    origin_access_control_id = aws_cloudfront_origin_access_control.website.id
+    origin_id                = local.s3_origin_id
   }
 
   custom_error_response {
@@ -261,15 +261,21 @@ resource "aws_cloudfront_response_headers_policy" "website_security" {
 
 data "aws_iam_policy_document" "allow_website_cloudfront" {
   statement {
-    sid = "Allow bucket access from CloudFront"
+    sid = "Allow bucket access from CloudFront using OAC"
 
     principals {
-      type        = "AWS"
-      identifiers = [aws_cloudfront_origin_access_identity.website.iam_arn]
+      type        = "Service"
+      identifiers = ["cloudfront.amazonaws.com"]
     }
 
     actions   = ["s3:GetObject"]
     resources = local.cloudfront_allowed_bucket_resources
+
+    condition {
+      test     = "StringEquals"
+      variable = "AWS:SourceArn"
+      values   = [aws_cloudfront_distribution.website.arn]
+    }
   }
 
   dynamic "statement" {
