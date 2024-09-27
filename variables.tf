@@ -22,8 +22,9 @@ variable "cors_allowed_origins" {
 }
 
 variable "cors_allowed_methods_additional" {
-  type    = list(string)
-  default = null
+  type     = list(string)
+  default  = []
+  nullable = false
 }
 
 variable "s3_policy_statements_additional" {
@@ -49,4 +50,9 @@ variable "s3_policy_statements_additional" {
 variable "cloudfront_allowed_bucket_resources" {
   type    = list(string)
   default = ["*"]
+}
+
+variable "redirect_to" {
+  type    = string
+  default = null
 }
