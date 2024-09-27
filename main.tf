@@ -4,11 +4,14 @@
  **/
 
 locals {
-  s3_origin_id                        = "websiteorigin"
-  s3_root_object                      = "index.html"
-  cors_allowed_default                = ["GET", "HEAD"]
-  сreate_cors_configuration           = var.cors_allowed_origins != null ? true : false
-  cors_allowed_methods                = var.cors_allowed_methods_additional != null ? concat(local.cors_allowed_default, var.cors_allowed_methods_additional) : local.cors_allowed_default
+  s3_origin_id         = "websiteorigin"
+  s3_root_object       = "index.html"
+  cors_allowed_default = ["GET", "HEAD"]
+
+  create_cors_configuration = var.cors_allowed_origins != null
+  create_redirect           = var.redirect_to != null
+
+  cors_allowed_methods                = concat(local.cors_allowed_default, var.cors_allowed_methods_additional)
   cloudfront_allowed_bucket_resources = [for resource in var.cloudfront_allowed_bucket_resources : "${aws_s3_bucket.website.arn}/${resource}"]
 }
 
@@ -101,7 +104,7 @@ resource "aws_s3_bucket" "website" {
 }
 
 resource "aws_s3_bucket_cors_configuration" "website" {
-  count  = local.сreate_cors_configuration ? 1 : 0
+  count  = local.create_cors_configuration ? 1 : 0
   bucket = aws_s3_bucket.website.id
 
   cors_rule {
@@ -113,10 +116,26 @@ resource "aws_s3_bucket_cors_configuration" "website" {
 }
 
 resource "aws_s3_bucket_website_configuration" "website" {
+  count  = local.create_redirect ? 0 : 1
   bucket = aws_s3_bucket.website.id
 
-  index_document { suffix = local.s3_root_object }
-  error_document { key = local.s3_root_object }
+  index_document {
+    suffix = local.s3_root_object
+  }
+
+  error_document {
+    key = local.s3_root_object
+  }
+}
+
+resource "aws_s3_bucket_website_configuration" "redirect" {
+  count  = local.create_redirect ? 1 : 0
+  bucket = aws_s3_bucket.website.id
+
+  redirect_all_requests_to {
+    host_name = var.redirect_to
+    protocol  = "https"
+  }
 }
 
 
@@ -124,6 +143,23 @@ resource "aws_s3_bucket_website_configuration" "website" {
  * CloudFront Distribution
  *
  **/
+
+locals {
+  custom_error_responses = local.create_redirect ? [] : [
+    {
+      error_caching_min_ttl = 86400
+      error_code            = 404
+      response_code         = 200
+      response_page_path    = "/${local.s3_root_object}"
+    },
+    {
+      error_caching_min_ttl = 86400
+      error_code            = 403
+      response_code         = 200
+      response_page_path    = "/${local.s3_root_object}"
+    }
+  ]
+}
 
 resource "aws_cloudfront_origin_access_control" "website" {
   name                              = var.domain
@@ -140,23 +176,33 @@ resource "aws_cloudfront_distribution" "website" {
   price_class         = "PriceClass_All"
 
   origin {
-    domain_name              = aws_s3_bucket.website.bucket_regional_domain_name
-    origin_access_control_id = aws_cloudfront_origin_access_control.website.id
+    domain_name = (local.create_redirect ?
+      aws_s3_bucket_website_configuration.redirect[0].website_endpoint :
+      aws_s3_bucket.website.bucket_regional_domain_name
+    )
+
+    origin_access_control_id = local.create_redirect ? null : aws_cloudfront_origin_access_control.website.id
     origin_id                = local.s3_origin_id
+
+    dynamic "custom_origin_config" {
+      for_each = local.create_redirect ? [1] : []
+      content {
+        http_port              = 80
+        https_port             = 443
+        origin_protocol_policy = "http-only"
+        origin_ssl_protocols   = ["TLSv1.2"]
+      }
+    }
   }
 
-  custom_error_response {
-    error_caching_min_ttl = 86400
-    error_code            = 404
-    response_code         = 200
-    response_page_path    = "/${local.s3_root_object}"
-  }
-
-  custom_error_response {
-    error_caching_min_ttl = 86400
-    error_code            = 403
-    response_code         = 200
-    response_page_path    = "/${local.s3_root_object}"
+  dynamic "custom_error_response" {
+    for_each = local.custom_error_responses
+    content {
+      error_caching_min_ttl = custom_error_response.value.error_caching_min_ttl
+      error_code            = custom_error_response.value.error_code
+      response_code         = custom_error_response.value.response_code
+      response_page_path    = custom_error_response.value.response_page_path
+    }
   }
 
   default_cache_behavior {
@@ -165,8 +211,8 @@ resource "aws_cloudfront_distribution" "website" {
     target_origin_id = local.s3_origin_id
 
     cache_policy_id            = aws_cloudfront_cache_policy.default.id
-    response_headers_policy_id = aws_cloudfront_response_headers_policy.website_security.id
-    viewer_protocol_policy     = "redirect-to-https"
+    response_headers_policy_id = local.create_redirect ? null : aws_cloudfront_response_headers_policy.website_security[0].id
+    viewer_protocol_policy     = local.create_redirect ? "allow-all" : "redirect-to-https"
   }
 
   restrictions {
@@ -201,7 +247,8 @@ resource "aws_cloudfront_cache_policy" "default" {
 }
 
 resource "aws_cloudfront_response_headers_policy" "website_security" {
-  name = replace(var.domain, ".", "-")
+  count = local.create_redirect ? 0 : 1
+  name  = replace(var.domain, ".", "-")
 
   custom_headers_config {
     items {
@@ -252,27 +299,35 @@ resource "aws_cloudfront_response_headers_policy" "website_security" {
  *
  **/
 
+locals {
+  s3_bucket_policy_statements = (local.create_redirect ?
+    var.s3_policy_statements_additional :
+    concat([{
+      sid = "Allow bucket access from CloudFront using OAC"
+
+      principals = [{
+        type        = "Service"
+        identifiers = ["cloudfront.amazonaws.com"]
+      }]
+
+      effect    = "Allow"
+      actions   = ["s3:GetObject"]
+      resources = local.cloudfront_allowed_bucket_resources
+
+      conditions = [{
+        test     = "StringEquals"
+        variable = "AWS:SourceArn"
+        values   = [aws_cloudfront_distribution.website.arn]
+      }]
+    }], var.s3_policy_statements_additional)
+  )
+  create_s3_bucket_policy = length(local.s3_bucket_policy_statements) > 0
+}
+
 data "aws_iam_policy_document" "allow_website_cloudfront" {
-  statement {
-    sid = "Allow bucket access from CloudFront using OAC"
-
-    principals {
-      type        = "Service"
-      identifiers = ["cloudfront.amazonaws.com"]
-    }
-
-    actions   = ["s3:GetObject"]
-    resources = local.cloudfront_allowed_bucket_resources
-
-    condition {
-      test     = "StringEquals"
-      variable = "AWS:SourceArn"
-      values   = [aws_cloudfront_distribution.website.arn]
-    }
-  }
-
+  count = local.create_s3_bucket_policy ? 1 : 0
   dynamic "statement" {
-    for_each = var.s3_policy_statements_additional
+    for_each = local.s3_bucket_policy_statements
 
     content {
       sid = statement.value["sid"]
@@ -295,13 +350,13 @@ data "aws_iam_policy_document" "allow_website_cloudfront" {
           variable = condition.value["variable"]
           values   = condition.value["values"]
         }
-
       }
     }
   }
 }
 
 resource "aws_s3_bucket_policy" "allow_cloudfront" {
+  count  = local.create_s3_bucket_policy ? 1 : 0
   bucket = aws_s3_bucket.website.id
-  policy = data.aws_iam_policy_document.allow_website_cloudfront.json
+  policy = data.aws_iam_policy_document.allow_website_cloudfront[0].json
 }
