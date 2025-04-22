@@ -58,7 +58,9 @@ module "website" {
 
 | Name | Description |
 |------|-------------|
-| <a name="output_bucket_id"></a> [bucket\_id](#output\_bucket\_id) | The S3 bucket identifier |
-| <a name="output_cloudfront_distribution_id"></a> [cloudfront\_distribution\_id](#output\_cloudfront\_distribution\_id) | The cloudfront distribution identifier assigned to the S3 bucket |
+| <a name="output_bucket_id"></a> [bucket\_id](#output\_bucket\_id) | Name of the S3 bucket used for website hosting |
+| <a name="output_bucket_arn"></a> [bucket\_arn](#output\_bucket\_arn) | ARN of the S3 bucket used for website hosting |
+| <a name="output_cloudfront_distribution_id"></a> [cloudfront\_distribution\_id](#output\_cloudfront\_distribution\_id) | ID of the CloudFront distribution serving the website |
+| <a name="output_cloudfront_distribution_arn"></a> [cloudfront\_distribution\_arn](#output\_cloudfront\_distribution\_arn) | ARN of the CloudFront distribution serving the website |
 | <a name="output_ssl_certificate_validation_dns_records"></a> [ssl\_certificate\_validation\_dns\_records](#output\_ssl\_certificate\_validation\_dns\_records) | List of text expressions of the certificate validation DNS records to create this records manually. Required if [create\_dns\_records](#input\_create\_dns\_records) is `false` |
 | <a name="output_resource_domain_record"></a> [resource\_domain\_record](#output\_resource\_domain\_record) | Text expressions of the website DNS record to create this records manually. Required if [create\_dns\_records](#input\_create\_dns\_records) is `false` |
