@@ -213,6 +213,14 @@ resource "aws_cloudfront_distribution" "website" {
     cache_policy_id            = aws_cloudfront_cache_policy.default.id
     response_headers_policy_id = local.create_redirect ? null : aws_cloudfront_response_headers_policy.website_security[0].id
     viewer_protocol_policy     = local.create_redirect ? "allow-all" : "redirect-to-https"
+
+    dynamic "function_association" {
+      for_each = var.cloudfront_auth ? [1] : []
+      content {
+        event_type   = "viewer-request"
+        function_arn = aws_cloudfront_function.basic_auth[0].arn
+      }
+    }
   }
 
   restrictions {
@@ -359,4 +367,38 @@ resource "aws_s3_bucket_policy" "allow_cloudfront" {
   count  = local.create_s3_bucket_policy ? 1 : 0
   bucket = aws_s3_bucket.website.id
   policy = data.aws_iam_policy_document.allow_website_cloudfront[0].json
+}
+
+
+/**
+ * CloudFront Authentication
+ *
+ **/
+
+# Generate random password for basic auth
+resource "random_password" "auth_password" {
+  count   = var.cloudfront_auth ? 1 : 0
+  length  = 16
+  special = true
+  upper   = true
+  lower   = true
+  numeric = true
+}
+
+# CloudFront function for basic authentication
+resource "aws_cloudfront_function" "basic_auth" {
+  count   = var.cloudfront_auth ? 1 : 0
+  name    = "${replace(var.domain, ".", "-")}-basic-auth"
+  runtime = "cloudfront-js-2.0"
+  comment = "Basic authentication for ${var.domain}"
+  publish = true
+  code    = replace(
+    replace(
+      file("${path.module}/cloudfront-auth-function.js"),
+      "AUTH_USERNAME_PLACEHOLDER",
+      var.auth_username != null ? var.auth_username : "admin"
+    ),
+    "AUTH_PASSWORD_PLACEHOLDER",
+    random_password.auth_password[0].result
+  )
 }

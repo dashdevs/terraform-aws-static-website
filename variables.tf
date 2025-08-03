@@ -56,3 +56,39 @@ variable "redirect_to" {
   type    = string
   default = null
 }
+
+variable "cloudfront_auth" {
+  type        = bool
+  default     = false
+  description = "Enable CloudFront Basic Auth with password rotation"
+}
+
+variable "slack_webhook_url" {
+  type        = string
+  default     = null
+  description = "Slack webhook URL for sending auth credentials"
+}
+
+variable "slack_channel" {
+  type        = string
+  default     = "#infrastructure"
+  description = "Slack channel to send auth credentials to"
+}
+
+variable "slack_username" {
+  type        = string
+  default     = "CF-Auth-Сreds"
+  description = "Slack username for notifications"
+}
+
+variable "slack_emoji" {
+  type        = string
+  default     = ":lock:"
+  description = "Slack emoji for notifications"
+}
+
+variable "auth_username" {
+  type        = string
+  default     = null
+  description = "Username for basic authentication (defaults to 'admin' when cloudfront_auth is true)"
+}
