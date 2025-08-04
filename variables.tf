@@ -56,3 +56,21 @@ variable "redirect_to" {
   type    = string
   default = null
 }
+
+variable "cloudfront_function_create" {
+  type    = bool
+  default = false
+}
+
+variable "cloudfront_function_config" {
+  type = object({
+    usage   = string
+    runtime = string
+    code    = string
+  })
+  default = {
+    usage   = "default_basic_auth"
+    runtime = "cloudfront-js-2.0"
+    code    = null
+  }
+}

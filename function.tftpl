@@ -1,0 +1,24 @@
+function handler(event) {
+  var request = event.request;
+  var headers = request.headers;
+  var password = event.kvs.get("password");
+  var domain = event.kvs.get("domain");
+
+  var authUser = '${domain}';
+  var authPass = '${basic_auth_password}';
+  var tmp = authUser + ':' + authPass;
+  var authString = 'Basic ' + tmp.toString('base64');
+
+  if (
+    typeof headers.authorization === 'undefined' ||
+    headers.authorization.value !== authString
+  ) {
+    return {
+      statusCode: 401,
+      statusDescription: 'Unauthorized',
+      headers: { 'www-authenticate': { value: 'Basic realm="Please Enter Your Password"' } }
+    };
+  }
+
+  return request;
+}
