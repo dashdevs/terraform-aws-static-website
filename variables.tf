@@ -59,8 +59,8 @@ variable "redirect_to" {
 
 variable "cloudfront_function_config" {
   type = map(object({
-    event_type = optional(string)
-    arn        = optional(string)
+    event_type = string
+    arn        = string
   }))
 
   default = {}
