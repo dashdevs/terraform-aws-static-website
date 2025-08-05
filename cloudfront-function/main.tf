@@ -53,20 +53,3 @@ resource "random_password" "password" {
   length  = 20
   special = false
 }
-
-resource "aws_secretsmanager_secret" "secret" {
-  count                   = local.cloudfront_function_configs.usage == "basic_auth" ? 1 : 0
-  name                    = "${var.domain}-basic-auth"
-  recovery_window_in_days = 0
-}
-
-resource "aws_secretsmanager_secret_version" "secret_version" {
-  count     = local.cloudfront_function_configs.usage == "basic_auth" ? 1 : 0
-  secret_id = aws_secretsmanager_secret.secret[0].id
-  secret_string = jsonencode(
-    {
-      username = local.cloudfront_function_configs.basic_auth.username
-      password = local.cloudfront_function_configs.basic_auth.password
-    }
-  )
-}
