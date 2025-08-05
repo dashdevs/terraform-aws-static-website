@@ -13,17 +13,6 @@ locals {
 
   cors_allowed_methods                = concat(local.cors_allowed_default, var.cors_allowed_methods_additional)
   cloudfront_allowed_bucket_resources = [for resource in var.cloudfront_allowed_bucket_resources : "${aws_s3_bucket.website.arn}/${resource}"]
-  cloudfront_function = (
-    var.cloudfront_function_create == false ? null : {
-      usage   = var.cloudfront_function_config.usage
-      runtime = var.cloudfront_function_config.runtime
-      code = (
-        var.cloudfront_function_config.usage == "default_basic_auth" ?
-        file("${path.module}/function.tftpl") :
-        var.cloudfront_function_config.code
-      )
-    }
-  )
 }
 
 check "application_repository_validation" {
@@ -225,10 +214,10 @@ resource "aws_cloudfront_distribution" "website" {
     response_headers_policy_id = local.create_redirect ? null : aws_cloudfront_response_headers_policy.website_security[0].id
     viewer_protocol_policy     = local.create_redirect ? "allow-all" : "redirect-to-https"
     dynamic "function_association" {
-      for_each = var.cloudfront_function_create ? [1] : []
+      for_each = var.cloudfront_function_config.arn != null ? [1] : []
       content {
-        event_type   = "viewer-request"
-        function_arn = aws_cloudfront_function.function[0].arn
+        event_type   = var.cloudfront_function_config.event_type
+        function_arn = var.cloudfront_function_config.arn
       }
     }
   }
@@ -310,59 +299,6 @@ resource "aws_cloudfront_response_headers_policy" "website_security" {
     }
   }
 }
-
-resource "aws_cloudfront_function" "function" {
-  count                        = var.cloudfront_function_create ? 1 : 0
-  publish                      = true
-  name                         = replace(var.domain, ".", "-")
-  runtime                      = local.cloudfront_function.runtime
-  code                         = local.cloudfront_function.code
-  key_value_store_associations = var.cloudfront_function_config.usage == "default_basic_auth" ? [aws_cloudfront_key_value_store.store[0].arn] : []
-}
-
-resource "aws_cloudfront_key_value_store" "store" {
-  count   = (var.cloudfront_function_create && var.cloudfront_function_config.usage == "default_basic_auth") ? 1 : 0
-  name    = replace(var.domain, ".", "-")
-  comment = "Key value store for ${var.domain} CloudFront function"
-}
-
-resource "aws_cloudfrontkeyvaluestore_key" "password" {
-  count               = (var.cloudfront_function_create && var.cloudfront_function_config.usage == "default_basic_auth") ? 1 : 0
-  key_value_store_arn = aws_cloudfront_key_value_store.store[0].arn
-  key                 = "password"
-  value               = random_password.password[0].result
-}
-
-resource "aws_cloudfrontkeyvaluestore_key" "domain" {
-  count               = (var.cloudfront_function_create && var.cloudfront_function_config.usage == "default_basic_auth") ? 1 : 0
-  key_value_store_arn = aws_cloudfront_key_value_store.store[0].arn
-  key                 = "domain"
-  value               = var.domain
-}
-
-resource "random_password" "password" {
-  count   = (var.cloudfront_function_create && var.cloudfront_function_config.usage == "default_basic_auth") ? 1 : 0
-  length  = 20
-  special = false
-}
-
-resource "aws_secretsmanager_secret" "secret" {
-  count                   = (var.cloudfront_function_create && var.cloudfront_function_config.usage == "default_basic_auth") ? 1 : 0
-  name                    = var.domain
-  recovery_window_in_days = 0
-}
-
-resource "aws_secretsmanager_secret_version" "secret_version" {
-  count     = (var.cloudfront_function_create && var.cloudfront_function_config.usage == "default_basic_auth") ? 1 : 0
-  secret_id = aws_secretsmanager_secret.secret[0].id
-  secret_string = jsonencode(
-    {
-      username = var.domain
-      password = random_password.password[0].result
-    }
-  )
-}
-
 
 /**
  * S3 Bucket IAM

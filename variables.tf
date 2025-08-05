@@ -57,20 +57,22 @@ variable "redirect_to" {
   default = null
 }
 
-variable "cloudfront_function_create" {
-  type    = bool
-  default = false
-}
-
 variable "cloudfront_function_config" {
   type = object({
-    usage   = string
-    runtime = string
-    code    = string
+    event_type = string
+    arn        = string
   })
+
   default = {
-    usage   = "default_basic_auth"
-    runtime = "cloudfront-js-2.0"
-    code    = null
+    event_type = "viewer-request"
+    arn        = null
+  }
+
+  validation {
+    condition = contains(
+      ["viewer-request", "viewer-response"],
+      var.cloudfront_function_config.event_type
+    )
+    error_message = "event_type must be either \"viewer-request\" or \"viewer-response\"."
   }
 }

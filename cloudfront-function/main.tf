@@ -1,0 +1,72 @@
+/**
+ * Config
+ *
+ **/
+
+locals {
+  cloudfront_function_configs = {
+    usage   = var.cloudfront_function_config.usage
+    runtime = var.cloudfront_function_config.runtime
+    code = (
+      var.cloudfront_function_config.usage == "basic_auth" ?
+      file("${path.module}/function.tftpl") :
+      var.cloudfront_function_config.code
+    )
+    basic_auth = {
+      username = try(var.cloudfront_function_config.basic_auth.username, null) != null ? var.cloudfront_function_config.basic_auth.username : var.domain
+      password = try(var.cloudfront_function_config.basic_auth.password, null) != null ? var.cloudfront_function_config.basic_auth.password : random_password.password[0].result
+    }
+  }
+}
+
+resource "aws_cloudfront_function" "function" {
+  publish                      = true
+  name                         = replace(var.domain, ".", "-")
+  comment                      = "function for ${var.domain}"
+  runtime                      = local.cloudfront_function_configs.runtime
+  code                         = local.cloudfront_function_configs.code
+  key_value_store_associations = local.cloudfront_function_configs.usage == "basic_auth" ? [aws_cloudfront_key_value_store.store[0].arn] : []
+}
+
+resource "aws_cloudfront_key_value_store" "store" {
+  count   = local.cloudfront_function_configs.usage == "basic_auth" ? 1 : 0
+  name    = replace(var.domain, ".", "-")
+  comment = "Key value store for ${var.domain} CloudFront function"
+}
+
+resource "aws_cloudfrontkeyvaluestore_key" "password" {
+  count               = local.cloudfront_function_configs.usage == "basic_auth" ? 1 : 0
+  key_value_store_arn = aws_cloudfront_key_value_store.store[0].arn
+  key                 = "password"
+  value               = local.cloudfront_function_configs.basic_auth.password
+}
+
+resource "aws_cloudfrontkeyvaluestore_key" "username" {
+  count               = local.cloudfront_function_configs.usage == "basic_auth" ? 1 : 0
+  key_value_store_arn = aws_cloudfront_key_value_store.store[0].arn
+  key                 = "username"
+  value               = local.cloudfront_function_configs.basic_auth.username
+}
+
+resource "random_password" "password" {
+  count   = try(var.cloudfront_function_config.basic_auth.password, null) == null ? 1 : 0
+  length  = 20
+  special = false
+}
+
+resource "aws_secretsmanager_secret" "secret" {
+  count                   = local.cloudfront_function_configs.usage == "basic_auth" ? 1 : 0
+  name                    = "${var.domain}-basic-auth"
+  recovery_window_in_days = 0
+}
+
+resource "aws_secretsmanager_secret_version" "secret_version" {
+  count     = local.cloudfront_function_configs.usage == "basic_auth" ? 1 : 0
+  secret_id = aws_secretsmanager_secret.secret[0].id
+  secret_string = jsonencode(
+    {
+      username = local.cloudfront_function_configs.basic_auth.username
+      password = local.cloudfront_function_configs.basic_auth.password
+    }
+  )
+}
