@@ -1,4 +1,4 @@
-# terraform-aws-static-website
+# terraform-aws-static-website/cloudfront-function
 
 
 ## Usage
@@ -18,6 +18,24 @@ module "website" {
   domain             = var.domain
   domain_zone_name   = var.domain_zone_name
   create_dns_records = true
+  cloudfront_function_config = {
+    event_type = "viewer-request"
+    arn        = module.cloudfront_function.cloudfront_function_arn
+  }
+}
+
+module "cloudfront_function" {
+  source             = "dashdevs/static-website/aws//cloudfront-function"
+  domain = var.domain_name
+  cloudfront_function_config = {
+    runtime = "cloudfront-js-2.0"
+    usage   = "basic_auth"
+    code    = "basic_auth"
+    basic_auth = {
+      username = "admin"
+      password = null
+    }
+  }
 }
 
 ```
@@ -43,24 +61,12 @@ module "website" {
 
 | Name | Description | Type | Default | Required |
 |------|-------------|------|---------|:--------:|
-| <a name="input_domain"></a> [domain](#input\_domain) | Domain name for the site | `string` | `n/a` | yes |
-| <a name="input_bucket_name"></a> [bucket\_name](#input\_bucket\_name) | The name for the S3 bucket | `string` | `n/a` | yes |
-| <a name="input_domain_zone_name"></a> [domain\_zone\_name](#input\_domain\_zone\_name) | The name of the domain zone in the route53 service for which DNS records will be created. Must be set if create_dns_records is `true` | `string` | `null` | no |
-| <a name="input_create_dns_records"></a> [create\_dns\_records](#input\_create\_dns\_records) | If true, then DNS records are created in route53 for this site and connected to the cloudfront distribution | `bool` |`true`| no |
-| <a name="input_cors_allowed_origins"></a> [cors\_allowed\_origins](#input\_cors\_allowed\_origins) | Used to declare domains from which the site will be accessed as a storage of static resources | `list(string)` |`null`| no |
-| <a name="input_cors_allowed_methods_additional"></a> [cors\_allowed\_methods\_additional](#input\_cors\_allowed\_methods\_additional) | Additional HTTP methods to be allowed in the CORS configuration for the S3 bucket (e.g., POST, PUT). | `list(string)` | `[]` | no |
-| <a name="input_s3_policy_statements_additional"></a> [s3\_policy\_statements\_additional](#input\_s3\_policy\_statements\_additional) | Additional policy [statments](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/data-sources/iam_policy_document#statement)  that need to be attached to the S3 bucket. | <pre>list(object({<br>  sid        = string<br>  principals = list(objec({<br>    type        = string<br>    identifiers = list(string)<br>  }))<br>  effect     = string<br>  actions    = list(string)<br>  resources  = list(string)<br>  conditions = list(object({<br>    test     = string<br>    variable = string<br>    values   = list(string)<br>  }))<br>}))</pre> | `[]` | no |
-| <a name="input_cloudfront_allowed_bucket_resources"></a> [cloudfront\_allowed\_bucket\_resources](#input\_cloudfront\_allowed\_bucket\_resources) | List of resources that the Cloudfront is allowed to access.  | `list(string)` |`["*"]`| no |
-| <a name="input_redirect_to"></a> [redirect\_to](#input\_redirect\_to) | Target domain for redirecting all requests, enforced with HTTPS. | `string` |`null`| no |
+| `domain` | The domain name to be used. | `string` | n/a | ✅ |
+| `cloudfront_function_config` | Configuration object for the CloudFront function. | <pre>object({<br>  runtime   = string<br>  usage     = string<br>  code      = string<br>  basic_auth = optional(object({<br>    username = string<br>    password = string<br>  }), null)<br>})</pre> | <pre>{<br>  runtime = "cloudfront-js-2.0"<br>  usage   = "basic_auth"<br>  code    = "basic_auth"<br>  basic_auth = {<br>    username = null<br>    password = null<br>  }<br>}</pre> | ❌ |
 
 
 ## Outputs
 
 | Name | Description |
 |------|-------------|
-| <a name="output_bucket_id"></a> [bucket\_id](#output\_bucket\_id) | Name of the S3 bucket used for website hosting |
-| <a name="output_bucket_arn"></a> [bucket\_arn](#output\_bucket\_arn) | ARN of the S3 bucket used for website hosting |
-| <a name="output_cloudfront_distribution_id"></a> [cloudfront\_distribution\_id](#output\_cloudfront\_distribution\_id) | ID of the CloudFront distribution serving the website |
-| <a name="output_cloudfront_distribution_arn"></a> [cloudfront\_distribution\_arn](#output\_cloudfront\_distribution\_arn) | ARN of the CloudFront distribution serving the website |
-| <a name="output_ssl_certificate_validation_dns_records"></a> [ssl\_certificate\_validation\_dns\_records](#output\_ssl\_certificate\_validation\_dns\_records) | List of text expressions of the certificate validation DNS records to create this records manually. Required if [create\_dns\_records](#input\_create\_dns\_records) is `false` |
-| <a name="output_resource_domain_record"></a> [resource\_domain\_record](#output\_resource\_domain\_record) | Text expressions of the website DNS record to create this records manually. Required if [create\_dns\_records](#input\_create\_dns\_records) is `false` |
+| `cloudfront_function_arn` | The ARN of the CloudFront function. |

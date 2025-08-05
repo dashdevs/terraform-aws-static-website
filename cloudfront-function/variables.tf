@@ -2,15 +2,6 @@ variable "domain" {
   type = string
 }
 
-variable "cloudfront_function_type" {
-  type    = string
-  default = "basic_auth"
-  validation {
-    condition     = contains(["basic_auth", "custom"], var.cloudfront_function_type)
-    error_message = "cloudfront_function_type must be either 'basic_auth' or 'custom'."
-  }
-}
-
 variable "cloudfront_function_config" {
   type = object({
     runtime = string
