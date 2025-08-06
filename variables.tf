@@ -69,7 +69,6 @@ variable "cloudfront_function_config" {
     condition = alltrue([
       for cfg in values(var.cloudfront_function_config) :
       contains(["viewer-request", "viewer-response"], cfg.event_type)
-      if cfg.event_type != null
     ])
     error_message = "cloudfront_function_config[*].event_type must be either 'viewer-request' or 'viewer-response'."
   }

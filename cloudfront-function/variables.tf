@@ -2,6 +2,10 @@ variable "domain" {
   type = string
 }
 
+variable "name" {
+  type = string
+}
+
 variable "cloudfront_function_config" {
   type = object({
     runtime = string
