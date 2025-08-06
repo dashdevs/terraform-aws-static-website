@@ -9,7 +9,7 @@ locals {
     runtime = var.cloudfront_function_config.runtime
     code = (
       var.cloudfront_function_config.usage == "basic_auth" ?
-      file("${path.module}/function.tftpl") :
+      file("${path.module}/basic_auth.tftpl") :
       var.cloudfront_function_config.code
     )
     basic_auth = {
