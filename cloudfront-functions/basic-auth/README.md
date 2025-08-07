@@ -15,8 +15,8 @@ systematic way so that they do not catch you by surprise.
 module "website" {
   source             = "dashdevs/static-website/aws"
   bucket_name        = var.bucket_name
-  domain             = var.domain
-  domain_zone_name   = var.domain_zone_name
+  name             = var.name
+  name_zone_name   = var.name_zone_name
   create_dns_records = true
   cloudfront_function_config = {
     event_type = "viewer-request"
@@ -25,13 +25,11 @@ module "website" {
 }
 
 module "cloudfront_function" {
-  source             = "dashdevs/static-website/aws//cloudfront-function"
-  domain = var.domain_name
+  source = "dashdevs/static-website/aws//cloudfront-function"
+  name   = "example"
   cloudfront_function_config = {
     runtime = "cloudfront-js-2.0"
-    usage   = "basic_auth"
-    code    = "basic_auth"
-    basic_auth = {
+    credentials = {
       username = "admin"
       password = null
     }
@@ -61,12 +59,18 @@ module "cloudfront_function" {
 
 | Name | Description | Type | Default | Required |
 |------|-------------|------|---------|:--------:|
-| `domain` | The domain name to be used. | `string` | n/a | ✅ |
-| `cloudfront_function_config` | Configuration object for the CloudFront function. | <pre>object({<br>  runtime   = string<br>  usage     = string<br>  code      = string<br>  basic_auth = optional(object({<br>    username = string<br>    password = string<br>  }), null)<br>})</pre> | <pre>{<br>  runtime = "cloudfront-js-2.0"<br>  usage   = "basic_auth"<br>  code    = "basic_auth"<br>  basic_auth = {<br>    username = null<br>    password = null<br>  }<br>}</pre> | ❌ |
-
+| `name` | The name name to be used. | `string` | n/a | ✅ |
+| `cloudfront_function_config` | Configuration object for the CloudFront function, including runtime and credentials. | <pre>object({<br>  runtime     = string<br>  credentials = object({<br>    username = string<br>    password = string<br>  })<br>})</pre> | <pre>{<br>  runtime = "cloudfront-js-2.0"<br>  credentials = {<br>    username = null<br>    password = null<br>  }<br>}</pre> | ❌ |
 
 ## Outputs
 
-| Name | Description |
-|------|-------------|
-| `cloudfront_function_arn` | The ARN of the CloudFront function. |
+| Name | Description | Sensitive |
+|------|-------------|:---------:|
+| `cloudfront_function_arn` | The ARN of the CloudFront function. | ❌ |
+| `basic_auth_credentials` | Basic auth credentials for the CloudFront function. | ✅ |
+
+## Notes
+
+- `cloudfront_function_config.runtime` defines the runtime for the CloudFront function. Defaults to `"cloudfront-js-2.0"`.
+- `cloudfront_function_config.credentials` contains the `username` and `password` for basic authentication. Both fields default to `null`.
+- `basic_auth_credentials` is marked as **sensitive** and should be handled securely.
