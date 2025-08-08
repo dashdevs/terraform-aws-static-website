@@ -57,20 +57,27 @@ module "cloudfront_function" {
 
 ## Inputs
 
-| Name | Description | Type | Default | Required |
-|------|-------------|------|---------|:--------:|
-| `name` | The name name to be used. | `string` | n/a | ✅ |
-| `cloudfront_function_config` | Configuration object for the CloudFront function, including runtime and credentials. | <pre>object({<br>  runtime     = string<br>  credentials = object({<br>    username = string<br>    password = string<br>  })<br>})</pre> | <pre>{<br>  runtime = "cloudfront-js-2.0"<br>  credentials = {<br>    username = null<br>    password = null<br>  }<br>}</pre> | ❌ |
+| Name      | Description                           | Type   | Default              | Required |
+|-----------|---------------------------------------|--------|----------------------|:--------:|
+| `name`    | The name of the CloudFront function.  | string | n/a                  | ✅       |
+| `runtime` | The runtime for the function.         | string | `"cloudfront-js-2.0"`| ❌       |
+| `username`| Username used for basic auth.         | string | `"admin"`            | ❌       |
+| `password`| Password used for basic auth.         | string | `null`               | ❌       |
+
+---
 
 ## Outputs
 
-| Name | Description | Sensitive |
-|------|-------------|:---------:|
-| `cloudfront_function_arn` | The ARN of the CloudFront function. | ❌ |
-| `basic_auth_credentials` | Basic auth credentials for the CloudFront function. | ✅ |
+| Name                      | Description                                | Sensitive |
+|---------------------------|--------------------------------------------|:---------:|
+| `cloudfront_function_arn`| The ARN of the CloudFront function.         | ❌        |
+| `username`               | The username for basic auth.               | ❌        |
+| `password`               | The password for basic auth.               | ✅        |
+
+---
 
 ## Notes
 
-- `cloudfront_function_config.runtime` defines the runtime for the CloudFront function. Defaults to `"cloudfront-js-2.0"`.
-- `cloudfront_function_config.credentials` contains the `username` and `password` for basic authentication. Both fields default to `null`.
-- `basic_auth_credentials` is marked as **sensitive** and should be handled securely.
+- If `password` is not provided, it should be generated or handled securely within the module logic.
+- `username` is stored using AWS KeyValueStore (or similar mechanism), and is exposed as an output.
+- Always treat the `password` output as **sensitive**—do not log or expose it.
