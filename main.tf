@@ -213,6 +213,13 @@ resource "aws_cloudfront_distribution" "website" {
     cache_policy_id            = aws_cloudfront_cache_policy.default.id
     response_headers_policy_id = local.create_redirect ? null : aws_cloudfront_response_headers_policy.website_security[0].id
     viewer_protocol_policy     = local.create_redirect ? "allow-all" : "redirect-to-https"
+    dynamic "function_association" {
+      for_each = var.cloudfront_function_config
+      content {
+        event_type   = function_association.value.event_type
+        function_arn = function_association.value.arn
+      }
+    }
   }
 
   restrictions {

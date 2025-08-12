@@ -56,3 +56,20 @@ variable "redirect_to" {
   type    = string
   default = null
 }
+
+variable "cloudfront_function_config" {
+  type = map(object({
+    event_type = string
+    arn        = string
+  }))
+
+  default = {}
+
+  validation {
+    condition = alltrue([
+      for cfg in values(var.cloudfront_function_config) :
+      contains(["viewer-request", "viewer-response"], cfg.event_type)
+    ])
+    error_message = "cloudfront_function_config[*].event_type must be either 'viewer-request' or 'viewer-response'."
+  }
+}
