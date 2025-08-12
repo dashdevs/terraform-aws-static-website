@@ -1,6 +1,6 @@
 locals {
   runtime  = var.runtime
-  password = try(var.password, null) != null ? var.password : random_password.this[0].result
+  password = var.password != null ? var.password : random_password.this[0].result
 }
 
 resource "aws_cloudfront_function" "this" {

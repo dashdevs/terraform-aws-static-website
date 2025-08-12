@@ -15,8 +15,8 @@ systematic way so that they do not catch you by surprise.
 module "website" {
   source             = "dashdevs/static-website/aws"
   bucket_name        = var.bucket_name
-  name             = var.name
-  name_zone_name   = var.name_zone_name
+  name               = var.name
+  name_zone_name     = var.name_zone_name
   create_dns_records = true
   cloudfront_function_config = {
     event_type = "viewer-request"
