@@ -19,8 +19,10 @@ module "website" {
   name_zone_name   = var.name_zone_name
   create_dns_records = true
   cloudfront_function_config = {
-    event_type = "viewer-request"
-    arn        = module.cloudfront_function.cloudfront_function_arn
+    basic_auth = {
+      event_type = "viewer-request"
+      arn        = module.cloudfront_function.cloudfront_function_arn
+    }
   }
 }
 
