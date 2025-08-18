@@ -25,15 +25,9 @@ module "website" {
 }
 
 module "cloudfront_function" {
-  source = "dashdevs/static-website/aws//cloudfront-function"
+  source = "dashdevs/static-website/aws//cloudfront-functions/basic-auth"
   name   = "example"
-  cloudfront_function_config = {
-    runtime = "cloudfront-js-2.0"
-    credentials = {
-      username = "admin"
-      password = null
-    }
-  }
+  username = "admin"
 }
 
 ```
