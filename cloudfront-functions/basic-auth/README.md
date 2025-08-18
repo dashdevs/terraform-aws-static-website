@@ -27,7 +27,7 @@ module "website" {
 }
 
 module "cloudfront_function" {
-  source = "dashdevs/static-website/aws//cloudfront-functions/basic-auth"
+  source = "dashdevs/static-website/aws/cloudfront-functions/basic-auth"
   name   = "example"
   username = "admin"
 }
