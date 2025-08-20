@@ -57,19 +57,16 @@ variable "redirect_to" {
   default = null
 }
 
-variable "cloudfront_function_config" {
-  type = map(object({
-    event_type = string
-    arn        = string
-  }))
-
-  default = {}
+variable "cloudfront_event_functions" {
+  description = "CloudFront event functions mapping"
+  type        = map(string)
+  default     = {}
 
   validation {
     condition = alltrue([
-      for cfg in values(var.cloudfront_function_config) :
-      contains(["viewer-request", "viewer-response"], cfg.event_type)
+      for k in keys(var.cloudfront_event_functions) :
+      contains(["viewer-request", "viewer-response"], k)
     ])
-    error_message = "cloudfront_function_config[*].event_type must be either 'viewer-request' or 'viewer-response'."
+    error_message = "Only 'viewer-request' and 'viewer-response' are allowed keys."
   }
 }
