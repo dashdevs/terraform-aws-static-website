@@ -52,7 +52,7 @@ module "website" {
 | <a name="input_s3_policy_statements_additional"></a> [s3\_policy\_statements\_additional](#input\_s3\_policy\_statements\_additional) | Additional policy [statments](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/data-sources/iam_policy_document#statement)  that need to be attached to the S3 bucket. | <pre>list(object({<br>  sid        = string<br>  principals = list(objec({<br>    type        = string<br>    identifiers = list(string)<br>  }))<br>  effect     = string<br>  actions    = list(string)<br>  resources  = list(string)<br>  conditions = list(object({<br>    test     = string<br>    variable = string<br>    values   = list(string)<br>  }))<br>}))</pre> | `[]` | no |
 | <a name="input_cloudfront_allowed_bucket_resources"></a> [cloudfront\_allowed\_bucket\_resources](#input\_cloudfront\_allowed\_bucket\_resources) | List of resources that the Cloudfront is allowed to access.  | `list(string)` |`["*"]`| no |
 | <a name="input_redirect_to"></a> [redirect\_to](#input\_redirect\_to) | Target domain for redirecting all requests, enforced with HTTPS. | `string` |`null`| no |
-
+| <a name="input_cloudfront_event_functions"></a> [cloudfront\_event\_functions](#input\_cloudfront\_event\_functions) | CloudFront event functions mapping. Only `viewer-request` and `viewer-response` keys are allowed<br></pre> | `map(string)` | `{}` | no |
 
 ## Outputs
 
