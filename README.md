@@ -1,6 +1,26 @@
 # terraform-aws-static-website
 
 
+## Providers
+
+This module requires that you provide the `aws` provider and an aliased provider
+for the `us-east-1` region (referred to as `aws.virginia` in the module). The
+`aws.virginia` provider is used for ACM certificate creation/validation because
+CloudFront requires ACM certificates to be in **US East (N. Virginia)** `us-east-1`.
+
+### Example provider configuration (root module)
+```
+provider "aws" {
+  region = "eu-west-1"
+}
+
+provider "aws" {
+  alias  = "virginia"
+  region = "us-east-1"
+}
+```
+
+
 ## Usage
 
 
@@ -30,13 +50,13 @@ module "website" {
 | Name | Version |
 |------|---------|
 | <a name="requirement_terraform"></a> [terraform](#requirement\_terraform) | >= 1.5.2 |
-| <a name="requirement_aws"></a> [aws](#requirement\_aws) | >= 3.34 |
+| <a name="requirement_aws"></a> [aws](#requirement\_aws) | >= 4.42 |
 
 ## Providers
 
 | Name | Version |
 |------|---------|
-| <a name="provider_aws"></a> [aws](#provider\_aws) | >= 3.34 |
+| <a name="provider_aws"></a> [aws](#provider\_aws) | >= 4.42 |
 
 
 ## Inputs
