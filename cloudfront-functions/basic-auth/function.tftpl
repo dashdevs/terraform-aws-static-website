@@ -1,0 +1,39 @@
+import cf from 'cloudfront';
+const kvsHandle = cf.kvs();
+
+async function handler(event) {
+  var request = event.request;
+  var headers = request.headers;
+
+  // Await values from KVS
+  let authUser, authPass;
+  try {
+    authUser = await kvsHandle.get("username");
+    authPass = await kvsHandle.get("password");
+  } catch (err) {
+    console.log(`KVS lookup failed: ${err}`);
+    return {
+      statusCode: 500,
+      statusDescription: 'Internal Server Error',
+    };
+  }
+
+  // Construct Basic Auth header
+  var tmp = authUser + ':' + authPass;
+  var authString = 'Basic ' + Buffer.from(tmp).toString('base64');
+
+  if (
+    typeof headers.authorization === 'undefined' ||
+    headers.authorization.value !== authString
+  ) {
+    return {
+      statusCode: 401,
+      statusDescription: 'Unauthorized',
+      headers: {
+        'www-authenticate': { value: 'Basic realm="Please Enter Your Password"' }
+      }
+    };
+  }
+
+  return request;
+}

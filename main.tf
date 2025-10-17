@@ -35,11 +35,6 @@ data "aws_route53_zone" "public_zone" {
  **/
 
 # To use an ACM certificate with CloudFront, make sure you request (or import) the certificate in the US East (N. Virginia)
-provider "aws" {
-  alias  = "virginia"
-  region = "us-east-1"
-}
-
 resource "aws_acm_certificate" "website" {
   provider = aws.virginia
 
@@ -213,6 +208,13 @@ resource "aws_cloudfront_distribution" "website" {
     cache_policy_id            = aws_cloudfront_cache_policy.default.id
     response_headers_policy_id = local.create_redirect ? null : aws_cloudfront_response_headers_policy.website_security[0].id
     viewer_protocol_policy     = local.create_redirect ? "allow-all" : "redirect-to-https"
+    dynamic "function_association" {
+      for_each = var.cloudfront_event_functions
+      content {
+        event_type   = function_association.key
+        function_arn = function_association.value
+      }
+    }
   }
 
   restrictions {

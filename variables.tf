@@ -56,3 +56,17 @@ variable "redirect_to" {
   type    = string
   default = null
 }
+
+variable "cloudfront_event_functions" {
+  description = "CloudFront event functions mapping"
+  type        = map(string)
+  default     = {}
+
+  validation {
+    condition = alltrue([
+      for k in keys(var.cloudfront_event_functions) :
+      contains(["viewer-request", "viewer-response"], k)
+    ])
+    error_message = "Only 'viewer-request' and 'viewer-response' are allowed keys."
+  }
+}

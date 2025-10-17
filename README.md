@@ -1,6 +1,26 @@
 # terraform-aws-static-website
 
 
+## Providers
+
+This module requires that you provide the `aws` provider and an aliased provider
+for the `us-east-1` region (referred to as `aws.virginia` in the module). The
+`aws.virginia` provider is used for ACM certificate creation/validation because
+CloudFront requires ACM certificates to be in **US East (N. Virginia)** `us-east-1`.
+
+### Example provider configuration (root module)
+```
+provider "aws" {
+  region = "eu-west-1"
+}
+
+provider "aws" {
+  alias  = "virginia"
+  region = "us-east-1"
+}
+```
+
+
 ## Usage
 
 
@@ -30,13 +50,13 @@ module "website" {
 | Name | Version |
 |------|---------|
 | <a name="requirement_terraform"></a> [terraform](#requirement\_terraform) | >= 1.5.2 |
-| <a name="requirement_aws"></a> [aws](#requirement\_aws) | >= 3.34 |
+| <a name="requirement_aws"></a> [aws](#requirement\_aws) | >= 4.42 |
 
 ## Providers
 
 | Name | Version |
 |------|---------|
-| <a name="provider_aws"></a> [aws](#provider\_aws) | >= 3.34 |
+| <a name="provider_aws"></a> [aws](#provider\_aws) | >= 4.42 |
 
 
 ## Inputs
@@ -52,7 +72,7 @@ module "website" {
 | <a name="input_s3_policy_statements_additional"></a> [s3\_policy\_statements\_additional](#input\_s3\_policy\_statements\_additional) | Additional policy [statments](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/data-sources/iam_policy_document#statement)  that need to be attached to the S3 bucket. | <pre>list(object({<br>  sid        = string<br>  principals = list(objec({<br>    type        = string<br>    identifiers = list(string)<br>  }))<br>  effect     = string<br>  actions    = list(string)<br>  resources  = list(string)<br>  conditions = list(object({<br>    test     = string<br>    variable = string<br>    values   = list(string)<br>  }))<br>}))</pre> | `[]` | no |
 | <a name="input_cloudfront_allowed_bucket_resources"></a> [cloudfront\_allowed\_bucket\_resources](#input\_cloudfront\_allowed\_bucket\_resources) | List of resources that the Cloudfront is allowed to access.  | `list(string)` |`["*"]`| no |
 | <a name="input_redirect_to"></a> [redirect\_to](#input\_redirect\_to) | Target domain for redirecting all requests, enforced with HTTPS. | `string` |`null`| no |
-
+| <a name="input_cloudfront_event_functions"></a> [cloudfront\_event\_functions](#input\_cloudfront\_event\_functions) | CloudFront event functions mapping. Only `viewer-request` and `viewer-response` keys are allowed<br></pre> | `map(string)` | `{}` | no |
 
 ## Outputs
 
