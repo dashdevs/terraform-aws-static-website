@@ -253,6 +253,14 @@ resource "aws_cloudfront_response_headers_policy" "website_security" {
   name  = replace(var.domain, ".", "-")
 
   custom_headers_config {
+    dynamic "items" {
+      for_each = var.cloudfront_custom_headers
+      content {
+        header   = items.value.header
+        value    = items.value.value
+        override = items.value.override
+      }
+    }
     items {
       header   = "X-Permitted-Cross-Domain-Policies"
       value    = "none"

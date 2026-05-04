@@ -57,6 +57,15 @@ variable "redirect_to" {
   default = null
 }
 
+variable "cloudfront_custom_headers" {
+  type = list(object({
+    header   = string
+    value    = string
+    override = bool
+  }))
+  default = []
+}
+
 variable "cloudfront_event_functions" {
   description = "CloudFront event functions mapping"
   type        = map(string)
