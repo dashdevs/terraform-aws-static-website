@@ -58,6 +58,7 @@ variable "redirect_to" {
 }
 
 variable "cloudfront_custom_headers" {
+  description = "Custom headers to add to the CloudFront response headers policy"
   type = list(object({
     header   = string
     value    = string
