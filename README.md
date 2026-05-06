@@ -76,6 +76,7 @@ module "website" {
 | <a name="input_cloudfront_event_functions"></a> [cloudfront\_event\_functions](#input\_cloudfront\_event\_functions) | CloudFront event functions mapping. Only `viewer-request` and `viewer-response` keys are allowed<br></pre> | `map(string)` | `{}` | no |
 
 ## Outputs
+
 | Name | Description |
 |------|-------------|
 | <a name="output_bucket_id"></a> [bucket\_id](#output\_bucket\_id) | Name of the S3 bucket used for website hosting |
