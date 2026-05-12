@@ -58,7 +58,7 @@ variable "redirect_to" {
 }
 
 variable "cloudfront_custom_headers" {
-  description = "Custom headers to add to the CloudFront response headers policy"
+  description = "Custom headers to add to the CloudFront response headers policy. By default Feature-Policy and X-Permitted-Cross-Domain-Policies are set"
   type = list(object({
     header   = string
     value    = string
