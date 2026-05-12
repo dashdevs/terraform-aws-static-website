@@ -269,12 +269,12 @@ resource "aws_cloudfront_response_headers_policy" "website_security" {
   name  = replace(var.domain, ".", "-")
 
   custom_headers_config {
-    dynamic "headers" {
+    dynamic "items" {
       for_each = local.cloudfront_merged_custom_headers
       content {
-        header   = headers.value.header
-        value    = headers.value.value
-        override = headers.value.override
+        header   = items.value.header
+        value    = items.value.value
+        override = items.value.override
       }
     }
   }
