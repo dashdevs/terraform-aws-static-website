@@ -13,6 +13,22 @@ locals {
 
   cors_allowed_methods                = concat(local.cors_allowed_default, var.cors_allowed_methods_additional)
   cloudfront_allowed_bucket_resources = [for resource in var.cloudfront_allowed_bucket_resources : "${aws_s3_bucket.website.arn}/${resource}"]
+
+  cloudfront_default_custom_headers = [
+    {
+      header   = "X-Permitted-Cross-Domain-Policies"
+      value    = "none"
+      override = true
+    },
+    {
+      header   = "Feature-Policy"
+      value    = "camera 'none'; fullscreen 'self'; geolocation *; microphone 'self' https://${var.domain}/*"
+      override = true
+    }
+  ]
+  cloudfront_default_custom_headers_map = { for obj in local.cloudfront_default_custom_headers : obj.header => obj }
+  cloudfront_custom_headers_map         = { for obj in var.cloudfront_custom_headers : obj.header => obj }
+  cloudfront_merged_custom_headers      = values(merge(local.cloudfront_default_custom_headers_map, local.cloudfront_custom_headers_map))
 }
 
 check "application_repository_validation" {
@@ -253,15 +269,13 @@ resource "aws_cloudfront_response_headers_policy" "website_security" {
   name  = replace(var.domain, ".", "-")
 
   custom_headers_config {
-    items {
-      header   = "X-Permitted-Cross-Domain-Policies"
-      value    = "none"
-      override = true
-    }
-    items {
-      header   = "Feature-Policy"
-      value    = "camera 'none'; fullscreen 'self'; geolocation *; microphone 'self' https://${var.domain}/*"
-      override = true
+    dynamic "items" {
+      for_each = local.cloudfront_merged_custom_headers
+      content {
+        header   = items.value.header
+        value    = items.value.value
+        override = items.value.override
+      }
     }
   }
 
