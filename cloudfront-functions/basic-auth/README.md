@@ -65,6 +65,7 @@ module "cloudfront_function" {
 | Name                      | Description                                | Sensitive |
 |---------------------------|--------------------------------------------|:---------:|
 | `cloudfront_function_arn`| The ARN of the CloudFront function.         | ❌        |
+| `key_value_store_arn`    | The ARN of the key value store holding the basic auth credentials. | ❌ |
 | `username`               | The username for basic auth.               | ❌        |
 | `password`               | The password for basic auth.               | ✅        |
 
