@@ -1,8 +1,11 @@
+%{ if enable_basic_auth }
 import cf from 'cloudfront';
 const kvsHandle = cf.kvs();
+%{ endif }
 
 async function handler(event) {
   var request = event.request;
+%{ if enable_basic_auth }
   var headers = request.headers;
 
   // Await values from KVS
@@ -11,7 +14,7 @@ async function handler(event) {
     authUser = await kvsHandle.get("username");
     authPass = await kvsHandle.get("password");
   } catch (err) {
-    console.log(`KVS lookup failed: ${err}`);
+    console.log(`KVS lookup failed: $${err}`);
     return {
       statusCode: 500,
       statusDescription: 'Internal Server Error',
@@ -35,5 +38,20 @@ async function handler(event) {
     };
   }
 
+%{ endif }
+%{ if enable_directory_index }
+  var uri = request.uri;
+
+  if (uri.endsWith('/')) {
+    request.uri += 'index.html';
+  } else if (!uri.includes('.')) {
+    return {
+      statusCode: 301,
+      statusDescription: 'Moved Permanently',
+      headers: { location: { value: uri + '/' } }
+    };
+  }
+
+%{ endif }
   return request;
 }

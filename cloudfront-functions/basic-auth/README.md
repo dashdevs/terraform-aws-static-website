@@ -40,13 +40,13 @@ module "cloudfront_function" {
 | Name | Version |
 |------|---------|
 | <a name="requirement_terraform"></a> [terraform](#requirement\_terraform) | >= 1.5.2 |
-| <a name="requirement_aws"></a> [aws](#requirement\_aws) | >= 3.34 |
+| <a name="requirement_aws"></a> [aws](#requirement\_aws) | >= 5.35 |
 
 ## Providers
 
 | Name | Version |
 |------|---------|
-| <a name="provider_aws"></a> [aws](#provider\_aws) | >= 3.34 |
+| <a name="provider_aws"></a> [aws](#provider\_aws) | >= 5.35 |
 
 
 ## Inputs
@@ -54,7 +54,6 @@ module "cloudfront_function" {
 | Name      | Description                           | Type   | Default              | Required |
 |-----------|---------------------------------------|--------|----------------------|:--------:|
 | `name`    | The name of the CloudFront function.  | string | n/a                  | ✅       |
-| `runtime` | The runtime for the function.         | string | `"cloudfront-js-2.0"`| ❌       |
 | `username`| Username used for basic auth.         | string | `"admin"`            | ❌       |
 | `password`| Password used for basic auth.         | string | `null`               | ❌       |
 
